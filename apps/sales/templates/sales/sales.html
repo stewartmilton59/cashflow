@@ -39,8 +39,8 @@
         }
 
         .summary-card {
-            background-color: #0a192f; /* Slightly lighter dark blue */
-            border: 3px solid #00bfff; /* Bright Blue */
+            background-color: #0a192f;
+            border: 3px solid #00bfff;
             border-radius: 12px;
             padding: 30px;
             text-align: center;
@@ -58,7 +58,7 @@
         .card-amount {
             font-size: 32px;
             font-weight: bold;
-            color: #00bfff; /* Bright Blue */
+            color: #00bfff;
             margin: 0;
         }
 
@@ -81,6 +81,7 @@
             overflow-x: auto;
             border-radius: 12px;
             border: 1px solid rgba(0, 191, 255, 0.3);
+            margin-bottom: 20px;
         }
 
         table {
@@ -108,12 +109,20 @@
             transition: background-color 0.2s ease;
         }
 
-        tr:last-child {
-            border-bottom: none;
-        }
-
         tr:hover {
             background-color: rgba(0, 191, 255, 0.05);
+        }
+
+        .total-row {
+            background-color: #112240;
+            font-weight: bold;
+            border-top: 2px solid #00bfff;
+            border-bottom: none !important;
+        }
+
+        .total-row td {
+            color: #ffffff;
+            font-size: 16px;
         }
 
         /* Badge status for Payment Methods */
@@ -137,9 +146,48 @@
             color: #c084fc;
             border: 1px solid #a855f7;
         }
+
+        /* Pagination Layout Controls */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .page-indicator {
+            color: #a0aec0;
+            font-size: 14px;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            background-color: transparent;
+            color: #00bfff;
+            border: 2px solid #00bfff;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background-color: #00bfff;
+            color: #00008B;
+            box-shadow: 0 0 12px rgba(0, 191, 255, 0.4);
+        }
     </style>
 </head>
 <body>
+    {% load humanize %}
 
     <h1>Daily Sales Overview</h1>
     <div class="date-subtitle">Today: {% now "F j, Y" %}</div>
@@ -147,17 +195,17 @@
     <div class="sales-summary-container">
         <div class="summary-card">
             <p class="card-title">Total Cash Sales (Today)</p>
-            <h2 class="card-amount">{{ total_cash_sales }} Tshs</h2>
+            <h2 class="card-amount">{{ total_cash_sales|intcomma }} Tshs</h2>
         </div>
 
         <div class="summary-card">
             <p class="card-title">Total Phone Payments (Today)</p>
-            <h2 class="card-amount">{{ total_phone_sales }} Tshs</h2>
+            <h2 class="card-amount">{{ total_phone_sales|intcomma }} Tshs</h2>
         </div>
     </div>
 
     <div class="transactions-section">
-        <h2 class="section-title">Recent Transactions</h2>
+        <h2 class="section-title">Transactions Log (Page {{ recent_sales.number }})</h2>
         
         <div class="table-responsive">
             <table>
@@ -174,7 +222,7 @@
                     <tr>
                         <td>{{ sale.timestamp|date:"Y-m-d" }}</td>
                         <td>{{ sale.timestamp|date:"H:i" }}</td>
-                        <td>{{ sale.amount }}</td>
+                        <td>{{ sale.amount|floatformat:"0"|intcomma }}</td>
                         <td>
                             {% if sale.payment_method == 'CASH' %}
                                 <span class="badge badge-cash">Cash</span>
@@ -188,9 +236,35 @@
                         <td colspan="4" style="text-align: center; color: #a0aec0;">No transactions recorded today.</td>
                     </tr>
                     {% endfor %}
+
+                    {% if recent_sales %}
+                    <tr class="total-row">
+                        <td colspan="2" style="text-align: right;">Total Daily Revenue:</td>
+                        <td style="color: #00bfff;">{{ grand_total_sales|floatformat:"0"|intcomma }} Tshs</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
+
+        {% if recent_sales.has_other_pages %}
+        <div class="pagination-container">
+            <div class="page-indicator">
+                Showing entries {{ recent_sales.start_index }}-{{ recent_sales.end_index }}
+            </div>
+            
+            <div class="pagination-buttons">
+                {% if recent_sales.has_previous %}
+                    <a href="?page={{ recent_sales.previous_page_number }}" class="btn-nav">« Previous</a>
+                {% endif %}
+
+                {% if recent_sales.has_next %}
+                    <a href="?page={{ recent_sales.next_page_number }}" class="btn-nav">Next »</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
 </body>
