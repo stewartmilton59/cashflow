@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Accounts</title>
+    <style>
+        body {
+            background-color: #00008B; /* Dark Blue */
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .user-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .user-card {
+            background-color: #0a192f; /* Slightly lighter dark blue for card depth */
+            border: 3px solid #00bfff; /* Bright Blue (Deep Sky Blue) */
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 191, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 191, 255, 0.4);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background-color: #00bfff;
+            color: #00008B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 auto 16px;
+            object-fit: cover; /* Ensures uploaded images map perfectly inside the circle */
+        }
+
+        .user-name {
+            font-size: 20px;
+            margin: 0 0 8px 0;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 14px;
+            color: #a0aec0;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .user-phone {
+            font-size: 14px;
+            color: #8892b0;
+            margin: 0 0 16px 0;
+        }
+
+        .user-email {
+            font-size: 14px;
+            color: #00bfff;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .user-email:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>User Accounts</h1>
+
+    <div class="user-container">
+        {% for account in accounts %}
+        <div class="user-card">
+            
+            {% if account.image %}
+                <img src="{{ account.image.url }}" alt="{{ account.name }}" class="avatar">
+            {% else %}
+                <div class="avatar">{{ account.name|slice:":2"|upper }}</div>
+            {% endif %}
+
+            <h2 class="user-name">{{ account.name }}</h2>
+            
+            <p class="user-role">{{ account.get_branch_display }}</p>
+            
+            <p class="user-phone">{{ account.phone_number }}</p>
+            
+            <a href="mailto:{{ account.email }}" class="user-email">{{ account.email }}</a>
+        </div>
+        {% empty %}
+        <p>No user accounts have been registered yet.</p>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
