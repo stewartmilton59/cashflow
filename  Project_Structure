@@ -1,0 +1,31 @@
+cashflow/
+├── apps/
+│   ├── core/                 # NEW: Decorators & utilities
+│   │   ├── __init__.py
+│   │   └── decorators.py
+│   │
+│   ├── accounts/             # UPDATED
+│   │   ├── models.py         # Custom User + Account models
+│   │   ├── views.py          # Login, Logout, Dashboard redirect
+│   │   ├── urls.py
+│   │   └── admin.py          # NEW: Custom admin
+│   │
+│   └── sales/                # UPDATED
+│       ├── models.py         # Sale with branch + accountant tracking
+│       ├── views.py          # Accountant & Director dashboards
+│       ├── urls.py
+│       └── admin.py          # NEW: Custom admin
+│
+├── templates/
+│   ├── base.html             # NEW: Base template
+│   ├── accounts/
+│   │   └── login.html        # NEW: Login page
+│   └── sales/
+│       ├── accountant_dashboard.html   # NEW
+│       └── director_dashboard.html     # NEW
+│
+├── cashflow/
+│   ├── settings.py           # UPDATED
+│   └── urls.py               # UPDATED
+│
+└── static/                   # CSS/JS assets

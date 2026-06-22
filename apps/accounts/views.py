@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.views import LogoutView
 from .models import Account
 
 def accounts(request):
@@ -15,3 +16,9 @@ def accounts(request):
     }
     
     return render(request, 'accounts/accounts.html', context)
+
+def login(request):
+    if request.method == 'POST':
+        return render(request, 'sales/accountant_dashboard.html')
+    else:
+        return render(request, 'accounts/login.html')

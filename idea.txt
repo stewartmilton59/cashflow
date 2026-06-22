@@ -1,0 +1,8 @@
+                        ACCOUNTANT(account) FACTIONS 
+accountat while entering sales will choose the branch which is she/he at,
+accountat can add Phone payments,
+accountat can add cash sales,
+when accountat add sales the sales stored on data base,
+                        DIRECTOR(account) FACTIONS
+sees all sales of all branches 
+receive sms when accountat add a sales

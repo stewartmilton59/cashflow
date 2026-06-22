@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Director Dashboard - All Branches{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📊 Director Overview — All Branches</h2>
+    <p style="color: #666; margin-top: 0.3rem;">View sales across all branches with date & branch filters</p>
+</div>
+
+<!-- Filters -->
+<div class="card">
+    <form method="get">
+        <div class="filter-bar">
+            <div class="form-group">
+                <label>Branch</label>
+                <select name="branch">
+                    <option value="">All Branches</option>
+                    {% for code, name in branch_choices %}
+                        <option value="{{ code }}" {% if selected_branch == code %}selected{% endif %}>
+                            {{ name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>From Date</label>
+                <input type="date" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="form-group">
+                <label>To Date</label>
+                <input type="date" name="date_to" value="{{ date_to }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+            <a href="{% url 'director_dashboard' %}" class="btn" style="background: #e0e0e0; color: #333;">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Overall Metrics -->
+<div class="metrics">
+    <div class="metric-card">
+        <h3>Total Cash Sales</h3>
+        <div class="value">Tshs {{ overall_cash|intcomma }}</div>
+    </div>
+    <div class="metric-card">
+        <h3>Total Phone Payments</h3>
+        <div class="value">Tshs {{ overall_phone|intcomma }}</div>
+    </div>
+    <div class="metric-card" style="border-top: 3px solid #1a237e;">
+        <h3>Grand Total (All Branches)</h3>
+        <div class="value">Tshs {{ overall_total|intcomma }}</div>
+    </div>
+    <div class="metric-card">
+        <h3>Total Transactions</h3>
+        <div class="value">{{ total_transactions|intcomma }}</div>
+    </div>
+</div>
+
+<!-- Branch Breakdown -->
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">🏦 Branch Performance Breakdown</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Branch</th>
+                <th>Cash Sales</th>
+                <th>Phone Payments</th>
+                <th>Total</th>
+                <th>Transactions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for branch in branch_totals %}
+            <tr>
+                <td><strong>{{ branch.name }}</strong></td>
+                <td>Tshs {{ branch.cash|intcomma }}</td>
+                <td>Tshs {{ branch.phone|intcomma }}</td>
+                <td style="font-weight: 600; color: #1a237e;">Tshs {{ branch.total|intcomma }}</td>
+                <td>{{ branch.transactions }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- All Transactions -->
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">📋 All Transactions</h3>
+    {% if recent_sales %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Branch</th>
+                <th>Method</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Accountant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in recent_sales %}
+            <tr>
+                <td>{{ sale.timestamp|date:"Y-m-d H:i" }}</td>
+                <td>{{ sale.get_branch_display }}</td>
+                <td>
+                    {% if sale.payment_method == 'CASH' %}
+                        <span class="badge badge-cash">Cash</span>
+                    {% else %}
+                        <span class="badge badge-phone">Phone</span>
+                    {% endif %}
+                </td>
+                <td style="font-weight: 600;">Tshs {{ sale.amount|intcomma }}</td>
+                <td>{{ sale.description|default:"—" }}</td>
+                <td>{{ sale.accountant.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if recent_sales.has_other_pages %}
+    <div class="pagination">
+        {% if recent_sales.has_previous %}
+            <a href="?page={{ recent_sales.previous_page_number }}&branch={{ selected_branch }}&date_from={{ date_from }}&date_to={{ date_to }}">← Prev</a>
+        {% endif %}
+        <span class="current">Page {{ recent_sales.number }} of {{ recent_sales.paginator.num_pages }}</span>
+        {% if recent_sales.has_next %}
+            <a href="?page={{ recent_sales.next_page_number }}&branch={{ selected_branch }}&date_from={{ date_from }}&date_to={{ date_to }}">Next →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+        <p style="text-align: center; color: #999; padding: 2rem;">No sales found for the selected criteria.</p>
+    {% endif %}
+</div>
+{% endblock %}

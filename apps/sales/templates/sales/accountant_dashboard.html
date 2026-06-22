@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Accountant Dashboard - {{ branch_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>🏦 {{ branch_name }}</h2>
+    <p style="color: #666; margin-top: 0.3rem;">Today's Sales Dashboard — {{ user.username }}</p>
+</div>
+
+<!-- Metrics -->
+<div class="metrics">
+    <div class="metric-card">
+        <h3>Cash Sales</h3>
+        <div class="value">Tshs {{ total_cash_sales|intcomma }}</div>
+    </div>
+    <div class="metric-card">
+        <h3>Phone Payments</h3>
+        <div class="value">Tshs {{ total_phone_sales|intcomma }}</div>
+    </div>
+    <div class="metric-card" style="border-top: 3px solid #1a237e;">
+        <h3>Grand Total</h3>
+        <div class="value">Tshs {{ grand_total_sales|intcomma }}</div>
+    </div>
+</div>
+
+<!-- Add Sale Form -->
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">➕ Record New Sale</h3>
+    <form method="post" action="{% url 'add_sale' %}">
+        {% csrf_token %}
+        <div class="filter-bar">
+            <div class="form-group">
+                <label>Amount (Tshs)</label>
+                <input type="number" name="amount" step="0.01" min="0.01" required placeholder="e.g. 50000">
+            </div>
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select name="payment_method" required>
+                    {% for code, name in payment_methods %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Description (Optional)</label>
+                <input type="text" name="description" placeholder="e.g. Invoice #123">
+            </div>
+            <button type="submit" class="btn btn-success">Record Sale</button>
+        </div>
+    </form>
+</div>
+
+<!-- Recent Sales -->
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">📋 Today's Transactions</h3>
+    {% if recent_sales %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Method</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Recorded By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in recent_sales %}
+            <tr>
+                <td>{{ sale.timestamp|time:"H:i" }}</td>
+                <td>
+                    {% if sale.payment_method == 'CASH' %}
+                        <span class="badge badge-cash">Cash</span>
+                    {% else %}
+                        <span class="badge badge-phone">Phone</span>
+                    {% endif %}
+                </td>
+                <td style="font-weight: 600;">Tshs {{ sale.amount|intcomma }}</td>
+                <td>{{ sale.description|default:"—" }}</td>
+                <td>{{ sale.accountant.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if recent_sales.has_other_pages %}
+    <div class="pagination">
+        {% if recent_sales.has_previous %}
+            <a href="?page={{ recent_sales.previous_page_number }}">← Prev</a>
+        {% endif %}
+        <span class="current">Page {{ recent_sales.number }} of {{ recent_sales.paginator.num_pages }}</span>
+        {% if recent_sales.has_next %}
+            <a href="?page={{ recent_sales.next_page_number }}">Next →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+        <p style="text-align: center; color: #999; padding: 2rem;">No sales recorded today.</p>
+    {% endif %}
+</div>
+{% endblock %}
